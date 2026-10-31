@@ -6,7 +6,7 @@
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
 Ce dépôt contient le Blueprint officiel permettant d'associer
-vos têtes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
+vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
 à votre thermostat FreezBee dans Home Assistant,
 afin d'envoyer automatiquement les consignes optimales à votre chaudière.
 
@@ -26,6 +26,28 @@ Vous pouvez aussi importer le Blueprint manuellement :
    ```text
    https://github.com/netica-org/freezbee-ha/blob/main/blueprints/pilotage-freezbee.yaml
    ```
+
+## Utilisation
+
+Pour utiliser ce blueprint, sélectionnez votre thermostat FreezBee, puis associez-lui les vannes thermostatiques qui contrôlent la température de chaque pièce de votre maison.
+
+<img width="1051" height="735" alt="Aperçu de l’interface utilisateur du Blueprint" src="https://github.com/user-attachments/assets/abe8e0b6-a7c6-469a-a926-d425543254ad" />
+
+L’automatisation récupère automatiquement les informations de chaque vanne thermostatique pour n’allumer la chaudière que lorsqu‘il y a au moins une pièce à chauffer, avec la consigne et la température ambiante adaptées.
+
+### Algorithme “_delta max_”
+
+L’automatisation détermine la pièce avec le plus grand écart entre la consigne et la température ambiante. Elle utilise les données de cette pièce (consigne et température ambiante) comme valeurs de référence à envoyer à votre chaudière.
+
+### Algorithme “_delta moyen_”
+
+L’automatisation ne considère que les pièces qui doivent être chauffées (température ambiante inférieure à la consigne et vanne thermostatique allumée en mode chauffage ou auto). Elle calcule les valeurs moyennes de la température ambiante ainsi que de la consigne de ces pièces, puis utilise ces valeurs comme référence à envoyer à votre chaudière.
+
+S’il y a moins de 2 pièces à chauffer, l’algorithme “delta moyen” est équivalent à “delta max”.
+
+### Optimisations
+
+Ce blueprint comporte plusieurs garde-fous pour assurer un bon fonctionnement en cas d’erreur ou d’indisponibilité d’un appareil. Le thermostat FreezBee est synchronisé dès qu’une modification de consigne est enregistrée sur au moins une des vannes thermostatiques associées. Un rafraîchissement toutes les 10 minutes est également en place pour surveiller l’évolution de la température ambiante.
 
 ## Remerciements
 
