@@ -1,0 +1,259 @@
+# yaml-language-server: $schema=none
+#
+# Copyright © 2026 Netica SAS and contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+blueprint:
+  homeassistant:
+    min_version: 2026.10.0
+  domain: automation
+  name: "Pilotage FreezBee"
+  author: "Netica"
+  description: |
+    Pilotez votre chauffage pièce par pièce.
+
+    Assignez des têtes thermostatiques connectées à votre thermostat FreezBee
+    pour envoyer les consignes optimales à votre chaudière.
+
+  input:
+    freezbee:
+      name: Thermostat FreezBee
+      description: Le thermostat FreezBee à piloter
+      selector:
+        entity:
+          filter:
+            - domain: climate
+              device:
+                manufacturer: Netica
+    valves:
+      name: Têtes thermostatiques associées
+      description: Liste des têtes thermostatiques associées à la zone de chauffage du thermostat FreezBee
+      selector:
+        entity:
+          multiple: true
+          reorder: true
+          filter:
+            - domain: climate
+    algo:
+      name: Algorithme à utiliser
+      description: |
+        - **Delta max** : *réactivité, confort optimal*
+          La chaudière s’adapte à la pièce ayant le besoin en chauffage le plus élevé.
+        - **Delta moyen** : *régulation douce*
+          Les valeurs moyennes des pièces à chauffer sont utilisées pour calculer la consigne transmise à la chaudière.
+      default: dmax
+      selector:
+        select:
+          options:
+            - label: Delta max
+              value: dmax
+            - label: Delta moyen
+              value: davg
+    active:
+      name: J’ai lu l’avertissement et j’active cette automatisation
+      description: >
+        Je comprends que pour ne pas surcharger le circulateur de la chaudière,
+        je laisse toujours au moins un radiateur ouvert, sans régulation automatique.
+        Au besoin, je demande l’avis d’un spécialiste.
+        J’accepte les termes de [la licence d’utilisation](https://github.com/netica-org/freezbee-ha/blob/main/LICENSE) de ce logiciel libre.
+
+        <br/>Copyright © 2026 Netica SAS et contributeurs | [Code source](https://github.com/netica-org/freezbee-ha)
+      default: false
+      selector:
+        boolean:
+
+mode: restart
+max_exceeded: silent
+
+triggers:
+  # on/off
+  - trigger: state
+    entity_id: !input valves
+  # changement de consigne
+  - trigger: state
+    entity_id: !input valves
+    attribute: temperature
+  # vérification de la température ambiante toutes les 10 min
+  - trigger: time_pattern
+    minutes: "/10"
+
+variables:
+  freezbee: !input freezbee
+  freezbee_entities: "{{ device_entities(device_id(freezbee)) | default([], true) }}"
+  valves: !input valves
+  algo: !input algo
+  active: !input active
+  use_remote_temp: >
+    {{
+      freezbee_entities
+      | select('search', 'use_remote_temperature')
+      | list | first | default(none)
+    }}
+  remote_temp: >
+    {{
+      freezbee_entities
+      | select('search', 'remote_temperature')
+      | reject('search', 'use_remote_temperature')
+      | list | first | default(none)
+    }}
+  INVALID_TEMP: -300
+
+conditions:
+  - condition: template
+    value_template: "{{ active }}"
+
+actions:
+  # anti-rebond
+  - delay: "00:00:05"
+
+  - variables:
+      analysis: >
+        {% set ns = namespace(
+          max_delta=INVALID_TEMP,
+          max_delta_current_temp=INVALID_TEMP,
+          max_delta_target_temp=INVALID_TEMP,
+          max_delta_valve=none,
+          open_valves_count=0,
+          valid_valves_count=0,
+          current_temp_sum=0,
+          target_temp_sum=0,
+        ) %}
+        {% for valve in valves %}
+          {% set valve_state = states(valve) %}
+          {% if valve_state in ['unavailable', 'unknown'] %}
+            {% continue %}
+          {% endif %}
+
+          {% set current_temp = state_attr(valve, 'current_temperature') | float(INVALID_TEMP) %}
+          {% set target_temp = state_attr(valve, 'temperature') | float(INVALID_TEMP) %}
+
+          {% if current_temp == INVALID_TEMP or target_temp == INVALID_TEMP %}
+            {% continue %}
+          {% endif %}
+
+          {% set ns.valid_valves_count = ns.valid_valves_count + 1 %}
+
+          {% set is_on = valve_state != 'off' %}
+          {% set delta = target_temp - current_temp %}
+
+          {% if is_on and delta > 0 %}
+            {% set ns.open_valves_count = ns.open_valves_count + 1 %}
+            {% set ns.current_temp_sum = ns.current_temp_sum + current_temp %}
+            {% set ns.target_temp_sum = ns.target_temp_sum + target_temp %}
+          {% endif %}
+
+          {% if is_on and delta > ns.max_delta %}
+            {% set ns.max_delta = delta %}
+            {% set ns.max_delta_current_temp = current_temp %}
+            {% set ns.max_delta_target_temp = target_temp %}
+            {% set ns.max_delta_valve = state_attr(valve, 'friendly_name') %}
+          {% endif %}
+        {% endfor %}
+
+        {% if algo == 'dmax' or ns.open_valves_count < 2 %}
+          {% set current_temp = ns.max_delta_current_temp %}
+          {% set target_temp = ns.max_delta_target_temp %}
+          {% set delta = ns.max_delta %}
+        {% else %}
+          {% set current_temp = ns.current_temp_sum / ns.open_valves_count %}
+          {% set target_temp = ns.target_temp_sum / ns.open_valves_count %}
+          {% set delta = target_temp - current_temp %}
+        {% endif %}
+
+        {{ {
+          'valid_valves_count': ns.valid_valves_count,
+          'open_valves_count': ns.open_valves_count,
+          'current_temp': current_temp | round(1),
+          'target_temp': target_temp | round(1),
+          'delta': delta | round(1),
+          'max_delta_valve': ns.max_delta_valve,
+        } }}
+      current_temp: "{{ analysis.current_temp }}"
+      target_temp: "{{ analysis.target_temp }}"
+      log_algo: >
+        {% if algo == 'dmax' %}
+          Δmax {{ analysis.delta }}°C
+          {{ '' if analysis.delta < 0 else analysis.max_delta_valve }}
+        {% elif algo == 'davg' %}
+          {% if analysis.open_valves_count > 0 %}
+            Δmoy {{ analysis.delta }}°C
+            | {{ analysis.open_valves_count }}/{{ analysis.valid_valves_count }} vannes ouvertes
+          {% else %}
+            {{ analysis.valid_valves_count }} vannes fermées
+          {% endif %}
+        {% else %}
+          Algo non géré
+        {% endif %}
+
+# ne fait rien s’il n’y a pas de vannes à prendre en compte
+  - if:
+    - condition: template
+      value_template: "{{ analysis.valid_valves_count < 1 }}"
+    then:
+      - stop: "Aucune vanne disponible"
+
+# ne fait rien si les attributes de contrôle à distance ne sont pas disponibles
+  - if:
+    - condition: template
+      value_template: "{{ remote_temp is none or use_remote_temp is none }}"
+    then:
+      - stop: "Attributes “remote” absents du thermostat FreezBee"
+
+# éteint FreezBee si toutes les vannes sont désactivées
+  - if:
+    - condition: template
+      value_template: "{{ analysis.delta == INVALID_TEMP }}"
+    then:
+      - action: climate.turn_off
+        target:
+          entity_id: "{{ freezbee }}"
+      - stop: "FreezBee éteint"
+
+# ne fait rien si FreezBee est déjà à jour
+  - if:
+    - condition: template
+      value_template: >
+        {{ states(freezbee) == 'heat'
+          and is_state(use_remote_temp, 'on')
+          and (states(remote_temp) | float(INVALID_TEMP) | round(1)) == current_temp
+          and state_attr(freezbee, 'temperature') | float(INVALID_TEMP) | round(1) == target_temp
+        }}
+    then:
+      - stop: "FreezBee déjà synchronisé"
+
+# met à jour FreezBee
+  - action: number.set_value
+    target:
+      entity_id: "{{ remote_temp }}"
+    data:
+      value: "{{ current_temp }}"
+  - action: switch.turn_on
+    target:
+      entity_id: "{{ use_remote_temp }}"
+  - action: climate.set_temperature
+    target:
+      entity_id: "{{ freezbee }}"
+    data:
+      hvac_mode: heat
+      temperature: "{{ target_temp }}"
+
+# Enregistre l’activité
+  - action: logbook.log
+    data:
+      name: "pilot_log"
+      message: "{{ log_algo }}"
+      domain: climate
+      entity_id: "{{ freezbee }}"
