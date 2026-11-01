@@ -31,7 +31,7 @@ Vous pouvez aussi importer le Blueprint manuellement :
 
 Pour utiliser ce blueprint, sélectionnez votre thermostat FreezBee, puis associez-lui les vannes thermostatiques qui contrôlent la température de chaque pièce de votre maison.
 
-<img width="1051" height="735" alt="Aperçu de l’interface utilisateur du Blueprint" src="https://github.com/user-attachments/assets/abe8e0b6-a7c6-469a-a926-d425543254ad" />
+<img width="805" height="792" alt="image" src="https://github.com/user-attachments/assets/f9a6ee27-ca51-4bd1-b780-e3a523305dab" />
 
 L’automatisation récupère automatiquement les informations de chaque vanne thermostatique pour n’allumer la chaudière que lorsqu‘il y a au moins une pièce à chauffer, avec la consigne et la température ambiante adaptées.
 
