@@ -6,20 +6,36 @@
 
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
-Ce dépôt contient le Blueprint officiel permettant d'associer
-vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
-à votre thermostat FreezBee dans Home Assistant,
-afin d'envoyer automatiquement les consignes optimales à votre chaudière.
+Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 
-## Installation rapide
+- Le blueprint [Pilotage FreezBee](./blueprints/pilotage-freezbee.yaml) :
+  <br/>
+  permet d'associer vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
+  à votre thermostat FreezBee dans Home Assistant,
+  afin d'envoyer automatiquement les consignes optimales à votre chaudière.
+- Le blueprint [Température ambiante déportée](./blueprints/remote-ambient.yaml) :
+  <br/>
+  remplace la température ambiante d’une vanne thermostatique connectée par celle d’un capteur déporté, pour éviter de mesurer la température trop près du radiateur.
 
-Cliquez sur le bouton ci-dessous pour importer directement ce Blueprint dans votre instance Home Assistant :
+## Prérequis
 
-[![Ouvrir dans Home Assistant et importer le Blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fpilotage-freezbee.yaml)
+- Home Assistant **2026.10 ou plus récent** ;
+- Un thermostat [FreezBee](https://freezbee.fr/products/thermostat-connecte-freezbee) ;
+- Des vannes thermostatiques connectées qui se comportent comme des thermostats
+  (entité `climate` dans Home Assistant) en °C ;
+- En option, un ou plusieurs capteurs de température ambiante (en °C) par pièce.
 
-### Importation manuelle
+## Pilotage FreezBee
 
-Vous pouvez aussi importer le Blueprint manuellement :
+### Installation rapide
+
+Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
+
+[![Ouvrir dans Home Assistant et importer le blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fpilotage-freezbee.yaml)
+
+### Installation manuelle
+
+Vous pouvez aussi importer le blueprint manuellement :
 
 1. Dans Home Assistant, rendez-vous dans **Paramètres** › **Automatisations et scènes** › **Blueprints**.
 2. Cliquez sur **Importer un blueprint** (en bas à droite).
@@ -28,7 +44,7 @@ Vous pouvez aussi importer le Blueprint manuellement :
    https://github.com/netica-org/freezbee-ha/blob/main/blueprints/pilotage-freezbee.yaml
    ```
 
-## Utilisation
+### Utilisation
 
 Pour utiliser ce blueprint, sélectionnez votre thermostat FreezBee, puis associez-lui les vannes thermostatiques qui contrôlent la température de chaque pièce de votre maison.
 
@@ -42,14 +58,71 @@ L’automatisation détermine la pièce avec le plus grand écart entre la consi
 
 ### Algorithme “_delta moyen_”
 
-L’automatisation ne considère que les pièces qui doivent être chauffées (température ambiante inférieure à la consigne et vanne thermostatique allumée en mode chauffage ou auto). Elle calcule les valeurs moyennes de la température ambiante ainsi que de la consigne de ces pièces, puis utilise ces valeurs comme référence à envoyer à votre chaudière.
+L’automatisation ne considère que les pièces qui doivent être chauffées (température ambiante inférieure à la consigne). Elle calcule la valeur moyenne de la température ambiante ainsi que de la consigne de ces pièces, puis utilise ces valeurs comme référence à envoyer à votre chaudière.
 
-S’il y a moins de 2 pièces à chauffer, l’algorithme “delta moyen” est équivalent à “delta max”.
+S’il y a moins de 2 pièces à chauffer, l’algorithme “*delta moyen*” est équivalent à “*delta max*”.
 
-### Optimisations
+## Température ambiante déportée
 
-Ce blueprint comporte plusieurs garde-fous pour assurer un bon fonctionnement en cas d’erreur ou d’indisponibilité d’un appareil. Le thermostat FreezBee est synchronisé dès qu’une modification de consigne est enregistrée sur au moins une des vannes thermostatiques associées. Un rafraîchissement toutes les 10 minutes est également en place pour surveiller l’évolution de la température ambiante.
+Une vanne mesure la température à proximité du radiateur, qui peut être différente
+de celle ressentie dans la pièce.
+
+Le blueprint [Température ambiante déportée](./blueprints/remote-ambient.yaml)
+permet d’utiliser la mesure d’un capteur de température ambiante mieux placé.
+
+### Installation
+
+Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
+
+[![Ouvrir dans Home Assistant et importer le Blueprint de synchronisation](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fremote-ambient.yaml)
+
+Si vous préférez, vous pouvez également importer ce blueprint manuellement avec l’adresse suivante :
+
+```text
+https://github.com/netica-org/freezbee-ha/blob/main/blueprints/remote-ambient.yaml
+```
+
+### Utilisation
+
+Vous devez créer autant d’automatisations que de pièces à contrôler.
+
+Exemple :
+
+1. Créez une automatisation et nommez-la, par exemple **Température ambiante — Salon**.
+2. Dans **Capteurs de température**, sélectionnez tous les capteurs
+   d'ambiance de cette pièce. Attention, ne sélectionnez pas la température interne des
+   vannes destinataires, pour éviter une boucle de mesure.
+3. Dans **Vannes thermostatiques**, sélectionnez directement les vannes de votre pièce.
+4. Vérifiez les conditions d’utilisation avant d’activer l’automatisation et l’enregistrer.
+5. Cliquez sur **Exécuter les actions** puis consultez la page **Historique des exécutions**
+   pour tester immédiatement la première synchronisation.
+6. Répétez ces étapes pour chaque pièce. N'associez pas une même vanne
+   à plusieurs automatisations de synchronisation.
+
+## Optimisations
+
+Ces blueprints comportent plusieurs garde-fous pour assurer un bon fonctionnement en cas d’erreur ou d’indisponibilité d’un appareil. Le thermostat FreezBee est synchronisé dès qu’une modification de consigne est enregistrée sur au moins une des vannes thermostatiques associées. Un rafraîchissement toutes les 10 minutes est également en place pour surveiller l’évolution de la température ambiante.
+
+## Bonus : pilotage d’un thermostat générique
+
+Si vous n’avez pas de thermostat FreezBee, une version générique est disponible.
+Celle-ci fonctionne avec n’importe quelle entité de type thermostat.
+Importez [ce blueprint](./blueprints/valves2thermostat.yaml), puis sélectionnez
+le thermostat central et ses vannes. Le thermostat doit exposer les attributs
+`current_temperature` et `temperature`, accepter le mode `heat`, ainsi que les
+méthodes `climate.set_temperature` et `climate.turn_off`.
+
+Les algorithmes **delta max** et **delta moyen** restent identiques, mais seule
+la consigne du thermostat est modifiée :
+**consigne = température ambiante du thermostat central + delta calculé**,
+arrondie à un chiffre après la virgule. Par exemple, avec une température centrale
+de 20 °C et un delta de +2 °C, la consigne envoyée est de 22 °C.
+
+## Licence
+
+Ces blueprints sont distribués sous [licence Apache 2.0](./LICENSE).
+Les mentions d'attribution sont disponibles dans [NOTICE](./NOTICE).
 
 ## Remerciements
 
-Merci à Aymeric Chessoux ([@achessoux](https://github.com/achessoux)) pour ses retours et la première preuve de concept ayant largement inspiré ce Blueprint.
+Merci à Aymeric Chessoux ([@achessoux](https://github.com/achessoux)) pour ses retours et la première preuve de concept ayant largement inspiré ce blueprint.
