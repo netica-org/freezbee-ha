@@ -2,6 +2,7 @@
 
 [![Licence Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.10%2B-41BDF5.svg)](https://www.home-assistant.io/)
+![Conçu en France](https://img.shields.io/badge/Made_in-%F0%9F%87%AB%F0%9F%87%B7-white)
 
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
