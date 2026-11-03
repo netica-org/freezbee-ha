@@ -1,0 +1,166 @@
+# yaml-language-server: $schema=none
+#
+# Copyright © 2026 Netica SAS and contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+blueprint:
+  homeassistant:
+    min_version: 2026.10.0
+  domain: automation
+  name: "Température ambiante déportée"
+  author: "Netica"
+  source_url: https://github.com/netica-org/freezbee-ha/blob/main/blueprints/remote-ambient.yaml
+  description: |
+    Associez vos capteurs de température ambiante aux vannes thermostatiques.
+
+    Créez une automatisation par pièce.
+
+    Sélectionnez les vannes thermostatiques de la pièce et un ou plusieurs
+    capteurs de température à utiliser comme référence de température ambiante.
+
+  input:
+    valves:
+      name: Vannes thermostatiques
+      description: >
+        Sélectionnez une ou plusieurs vannes situées dans la même pièce.
+
+        Si vous sélectionnez plusieurs vannes, elles reçoivent la même température ambiante.
+      selector:
+        entity:
+          multiple: true
+          reorder: true
+          filter:
+            - domain: climate
+              supported_features:
+                - climate.ClimateEntityFeature.TARGET_TEMPERATURE
+    temp_sources:
+      name: Capteurs de température
+      description: >
+        Sélectionnez un ou plusieurs capteurs de température ambiante situés dans la même pièce.
+
+        Si vous sélectionnez plusieurs capteurs, la température ambiante moyenne est retenue.
+      selector:
+        entity:
+          multiple: true
+          reorder: true
+          filter:
+            - domain: sensor
+              device_class: temperature
+    active:
+      name: J’ai lu les conditions d’utilisation et j’active cette automatisation
+      description: >
+        J’accepte les termes de
+        [la licence d’utilisation](https://github.com/netica-org/freezbee-ha/blob/main/LICENSE)
+        (Apache 2.0) de ce logiciel.
+
+        <br/>Copyright © 2026 Netica SAS et contributeurs | [Code source](https://github.com/netica-org/freezbee-ha)
+      default: false
+      selector:
+        boolean:
+
+mode: restart
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input temp_sources
+  - trigger: state
+    entity_id: !input temp_sources
+    attribute: temperature
+  - trigger: state
+    entity_id: !input valves
+    from:
+      - unavailable
+      - unknown
+  - trigger: time_pattern
+    minutes: "/10"
+    id: heartbeat
+
+variables:
+  temp_sources: !input temp_sources
+  valves: !input valves
+  active: !input active
+
+conditions:
+  - condition: template
+    value_template: "{{ active }}"
+
+actions:
+  # anti-rebond
+  - delay: "00:00:05"
+
+  - if:
+      - condition: template
+        value_template: "{{ valves | count < 1 }}"
+    then:
+      - stop: "Aucune vanne sélectionnée"
+
+  - if:
+      - condition: template
+        value_template: "{{ temp_sources | count < 1 }}"
+    then:
+      - stop: "Aucun capteur de température sélectionné"
+
+  - variables:
+      temperatures: >
+        {% set ns = namespace(values=[]) %}
+        {% for sensor in temp_sources | unique %}
+          {% set value = states(sensor) %}
+          {% if not is_number(value) %}
+            {% continue %}
+          {% endif %}
+          {% set ns.values = ns.values + [value] %}
+        {% endfor %}
+        {{ ns.values }}
+
+  - if:
+      - condition: template
+        value_template: "{{ temperatures | count < 1 }}"
+    then:
+      - stop: "Aucun capteur de température valide"
+
+  - variables:
+      ambient_temperature: "{{ temperatures | average | round(1) }}"
+
+  - repeat:
+      for_each: "{{ valves | unique | list }}"
+      sequence:
+        - variables:
+            valve: "{{ repeat.item }}"
+            valve_entity_id: "{{ valve.split('.', 1)[1] }}"
+            temperature_input: "{{ 'number.' ~ valve_entity_id ~ '_external_temperature_input' }}"
+            sensor_selector: "{{ 'select.' ~ valve_entity_id ~ '_temperature_sensor_select' }}"
+            remote_temperature_option: remote_temperature
+
+        - condition: template
+          value_template: >
+            {{ states(temperature_input) not in ['unavailable', 'unknown']
+              and states(sensor_selector) not in ['unavailable', 'unknown']
+              and remote_temperature_option in (state_attr(sensor_selector, 'options') | default([], true))
+            }}
+
+        - continue_on_error: true
+          sequence:
+            - action: number.set_value
+              target:
+                entity_id: "{{ temperature_input }}"
+              data:
+                value: "{{ ambient_temperature }}"
+            - action: select.select_option
+              target:
+                entity_id: "{{ sensor_selector }}"
+              data:
+                option: "{{ remote_temperature_option }}"
