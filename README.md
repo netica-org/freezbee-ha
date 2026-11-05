@@ -6,7 +6,7 @@
 
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
-Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
+Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 
 - Le blueprint [Pilotage FreezBee](#pilotage-freezbee) :
   <br/>
@@ -32,7 +32,7 @@ vous devez utiliser une version pour [thermostat générique](#bonus-pilotage-du
 
 ### Installation rapide
 
-Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
+Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
 
 [![Ouvrir dans Home Assistant et importer le blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fvalves2freezbee.yaml)
 
@@ -75,7 +75,7 @@ permet d’utiliser la mesure d’un capteur de température ambiante mieux plac
 
 ### Installation
 
-Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
+Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
 
 [![Ouvrir dans Home Assistant et importer le Blueprint de synchronisation](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fremote-ambient.yaml)
 
@@ -116,7 +116,7 @@ le thermostat central et ses vannes. Le thermostat doit exposer les attributs
 méthodes `climate.set_temperature` et `climate.turn_off`.
 
 Les algorithmes **delta max** et **delta moyen** restent identiques, mais seule
-la consigne du thermostat est modifiée :
+la consigne du thermostat est modifiée :
 **consigne = température ambiante du thermostat central + delta calculé**,
 arrondie à un chiffre après la virgule. Par exemple, avec une température centrale
 de 20 °C et un delta de +2 °C, la consigne envoyée est de 22 °C.
