@@ -142,13 +142,27 @@ actions:
             temperature_input: "{{ 'number.' ~ valve_entity_id ~ '_external_temperature_input' }}"
             sensor_selector: "{{ 'select.' ~ valve_entity_id ~ '_temperature_sensor_select' }}"
             remote_temperature_option: remote_temperature
+            can_sync: >
+              {{ states(temperature_input) not in ['unavailable', 'unknown']
+                and states(sensor_selector) not in ['unavailable', 'unknown']
+                and remote_temperature_option in (state_attr(sensor_selector, 'options') | default([], true))
+              }}
+
+        - if:
+            - condition: template
+              value_template: "{{ not can_sync }}"
+          then:
+            - action: logbook.log
+              data:
+                name: "Température ambiante déportée"
+                message: >-
+                  Synchronisation ignorée : entité indisponible
+                  ou attributs pour capteur externe incompatibles
+                domain: climate
+                entity_id: "{{ valve }}"
 
         - condition: template
-          value_template: >
-            {{ states(temperature_input) not in ['unavailable', 'unknown']
-              and states(sensor_selector) not in ['unavailable', 'unknown']
-              and remote_temperature_option in (state_attr(sensor_selector, 'options') | default([], true))
-            }}
+          value_template: "{{ can_sync }}"
 
         - continue_on_error: true
           sequence:
