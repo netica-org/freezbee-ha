@@ -8,7 +8,7 @@ Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des 
 
 Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 
-- Le blueprint [Pilotage FreezBee](./blueprints/pilotage-freezbee.yaml) :
+- Le blueprint [Pilotage FreezBee](./blueprints/valves2freezbee.yaml) :
   <br/>
   permet d'associer vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
   à votre thermostat FreezBee dans Home Assistant,
@@ -31,7 +31,7 @@ Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 
 Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
 
-[![Ouvrir dans Home Assistant et importer le blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fpilotage-freezbee.yaml)
+[![Ouvrir dans Home Assistant et importer le blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fvalves2freezbee.yaml)
 
 ### Installation manuelle
 
@@ -41,7 +41,7 @@ Vous pouvez aussi importer le blueprint manuellement :
 2. Cliquez sur **Importer un blueprint** (en bas à droite).
 3. Collez l'URL suivante :
    ```text
-   https://github.com/netica-org/freezbee-ha/blob/main/blueprints/pilotage-freezbee.yaml
+   https://github.com/netica-org/freezbee-ha/blob/main/blueprints/valves2freezbee.yaml
    ```
 
 ### Utilisation
