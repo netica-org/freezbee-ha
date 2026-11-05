@@ -7,3 +7,5 @@ rules:
     spaces: 2
     indent-sequences: whatever
   comments-indentation: disable
+  truthy:
+    check-keys: false

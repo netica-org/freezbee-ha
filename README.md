@@ -131,10 +131,9 @@ Merci à Aymeric Chessoux ([@achessoux](https://github.com/achessoux)) pour ses 
 
 ## Contribuer
 
-### Lancer les tests
+Le projet utilise [Python 3.14](https://www.python.org/) ainsi que les outils [uv](https://docs.astral.sh/uv/getting-started/installation/) et `make`.
 
-Avec [uv](https://docs.astral.sh/uv/getting-started/installation/) et `make`
-installés, pour vérifier tous les blueprints :
+### Lancer les tests
 
 ```bash
 make test
