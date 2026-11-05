@@ -44,8 +44,6 @@ blueprint:
           reorder: true
           filter:
             - domain: climate
-              supported_features:
-                - climate.ClimateEntityFeature.TARGET_TEMPERATURE
     temp_sources:
       name: Capteurs de température
       description: >
