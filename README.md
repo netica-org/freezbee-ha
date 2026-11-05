@@ -3,6 +3,7 @@
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.10%2B-41BDF5.svg)](https://www.home-assistant.io/)
 [![Licence Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 ![Conçu en France](https://img.shields.io/badge/Made_in-%F0%9F%87%AB%F0%9F%87%B7-white)
+[![Tests](https://github.com/netica-org/freezbee-ha/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/netica-org/freezbee-ha/actions/workflows/tests.yaml)
 
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
@@ -127,3 +128,17 @@ Les mentions d'attribution sont disponibles dans [NOTICE](./NOTICE).
 ## Remerciements
 
 Merci à Aymeric Chessoux ([@achessoux](https://github.com/achessoux)) pour ses retours et la première preuve de concept ayant largement inspiré ce blueprint.
+
+## Contribuer
+
+### Lancer les tests
+
+Avec [uv](https://docs.astral.sh/uv/getting-started/installation/) et `make`
+installés, pour vérifier tous les blueprints :
+
+```bash
+make test
+```
+
+`uv` crée si nécessaire un environnement virtuel `.venv` et installe les versions
+de dépendances requises.
