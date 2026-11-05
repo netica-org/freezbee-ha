@@ -1,29 +1,32 @@
 # Piloter FreezBee avec Home Assistant
 
-[![Licence Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.10%2B-41BDF5.svg)](https://www.home-assistant.io/)
+[![Licence Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 ![Conçu en France](https://img.shields.io/badge/Made_in-%F0%9F%87%AB%F0%9F%87%B7-white)
 
 Pilotez votre chauffage pièce par pièce avec votre thermostat FreezBee et des vannes thermostatiques.
 
 Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 
-- Le blueprint [Pilotage FreezBee](./blueprints/valves2freezbee.yaml) :
+- Le blueprint [Pilotage FreezBee](#pilotage-freezbee) :
   <br/>
-  permet d'associer vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
+  Permet d'associer vos vannes thermostatiques connectées (Zigbee, Z-Wave, Matter, Wi-Fi...)
   à votre thermostat FreezBee dans Home Assistant,
   afin d'envoyer automatiquement les consignes optimales à votre chaudière.
-- Le blueprint [Température ambiante déportée](./blueprints/remote-ambient.yaml) :
+- Le blueprint [Température ambiante déportée](#température-ambiante-déportée) :
   <br/>
-  remplace la température ambiante d’une vanne thermostatique connectée par celle d’un capteur déporté, pour éviter de mesurer la température trop près du radiateur.
+  Remplace la température ambiante d’une vanne thermostatique connectée par celle d’un capteur déporté, pour éviter de mesurer la température trop près du radiateur.
 
 ## Prérequis
 
 - Home Assistant **2026.10 ou plus récent** ;
-- Un thermostat [FreezBee](https://freezbee.fr/products/thermostat-connecte-freezbee) ;
+- Un thermostat [FreezBee](https://freezbee.fr/products/thermostat-connecte-freezbee) (ou générique[^1]) ;
 - Des vannes thermostatiques connectées qui se comportent comme des thermostats
   (entité `climate` dans Home Assistant) en °C ;
 - En option, un ou plusieurs capteurs de température ambiante (en °C) par pièce.
+
+[^1]: Si vous n’avez pas de thermostat FreezBee (conçu pour les chaudières Frisquet Visio),
+vous devez utiliser une version pour [thermostat générique](#bonus-pilotage-dun-thermostat-générique).
 
 ## Pilotage FreezBee
 
