@@ -15,12 +15,16 @@ def test_blueprints_exist() -> None:
     assert BLUEPRINTS, "Aucun blueprint YAML trouvé"
 
 
-@pytest.mark.parametrize('path', BLUEPRINTS, ids=lambda path: path.name)
-def test_blueprint_schema(path: Path) -> None:
-    blueprint = Blueprint(
+@pytest.fixture
+def blueprint(path: Path) -> Blueprint:
+    return Blueprint(
         yaml_util.load_yaml_dict(path),
         path=path.name,
         expected_domain='automation',
         schema=BLUEPRINT_SCHEMA,
     )
+
+
+@pytest.mark.parametrize('path', BLUEPRINTS, ids=lambda path: path.name)
+def test_blueprint_validation(blueprint: Blueprint) -> None:
     assert blueprint.validate() is None
