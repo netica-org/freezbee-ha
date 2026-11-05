@@ -36,9 +36,6 @@ blueprint:
         entity:
           filter:
             - domain: climate
-              supported_features:
-                - climate.ClimateEntityFeature.TARGET_TEMPERATURE
-                - climate.ClimateEntityFeature.TURN_OFF
     valves:
       name: Têtes thermostatiques associées
       description: Liste des têtes thermostatiques associées à la zone de chauffage du thermostat central
