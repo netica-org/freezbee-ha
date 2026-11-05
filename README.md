@@ -22,21 +22,19 @@ Ce dépôt contient les blueprints officiels FreezBee pour Home Assistant :
 - Home Assistant **2026.10 ou plus récent** ;
 - Un thermostat [FreezBee](https://freezbee.fr/products/thermostat-connecte-freezbee) (ou générique[^1]) ;
 - Des vannes thermostatiques connectées qui se comportent comme des thermostats
-  (entité `climate` dans Home Assistant) en °C ;
-- En option, un ou plusieurs capteurs de température ambiante (en °C) par pièce.
+  (entité `climate` dans Home Assistant) ;
+- En option, un ou plusieurs capteurs de température ambiante par pièce.
 
 [^1]: Si vous n’avez pas de thermostat FreezBee (conçu pour les chaudières Frisquet Visio),
 vous devez utiliser une version pour [thermostat générique](#bonus-pilotage-dun-thermostat-générique).
 
 ## Pilotage FreezBee
 
-### Installation rapide
+### Installation
 
 Cliquez sur le bouton ci-dessous pour importer directement ce blueprint dans votre instance Home Assistant :
 
 [![Ouvrir dans Home Assistant et importer le blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fnetica-org%2Ffreezbee-ha%2Fblob%2Fmain%2Fblueprints%2Fvalves2freezbee.yaml)
-
-### Installation manuelle
 
 Vous pouvez aussi importer le blueprint manuellement :
 
@@ -49,7 +47,7 @@ Vous pouvez aussi importer le blueprint manuellement :
 
 ### Utilisation
 
-Pour utiliser ce blueprint, sélectionnez votre thermostat FreezBee, puis associez-lui les vannes thermostatiques qui contrôlent la température de chaque pièce de votre maison.
+Pour utiliser ce blueprint, sélectionnez votre thermostat FreezBee, puis associez-lui les vannes thermostatiques qui contrôlent vos radiateurs.
 
 <img width="805" height="792" alt="image" src="https://github.com/user-attachments/assets/f9a6ee27-ca51-4bd1-b780-e3a523305dab" />
 

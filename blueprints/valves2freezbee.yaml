@@ -25,7 +25,7 @@ blueprint:
   description: |
     Pilotez votre chauffage pièce par pièce.
 
-    Assignez des têtes thermostatiques connectées à votre thermostat FreezBee
+    Assignez des vannes thermostatiques connectées à votre thermostat FreezBee
     pour envoyer les consignes optimales à votre chaudière.
 
   input:
@@ -39,8 +39,8 @@ blueprint:
               device:
                 manufacturer: Netica
     valves:
-      name: Têtes thermostatiques associées
-      description: Liste des têtes thermostatiques associées à la zone de chauffage du thermostat FreezBee
+      name: Vannes thermostatiques associées
+      description: Liste des vannes thermostatiques associées à la zone de chauffage du thermostat FreezBee
       selector:
         entity:
           multiple: true
