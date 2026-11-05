@@ -116,7 +116,7 @@ actions:
       temperatures: >
         {% set ns = namespace(values=[]) %}
         {% for sensor in temp_sources | unique %}
-          {% set value = states(sensor) %}
+          {% set value = states(sensor) | float(none) %}
           {% if not is_number(value) %}
             {% continue %}
           {% endif %}
