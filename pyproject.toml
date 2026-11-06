@@ -6,13 +6,18 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "homeassistant==2026.10.0",
-    "pytest==9.2.0",
+    "homeassistant==2026.11.0",
+    "pytest",
+    "pytest-homeassistant==2026.11.0",
     "yamllint==1.37.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-p no:respx"
+pythonpath = ["."]
 filterwarnings = [
-    "ignore:Inheritance class HomeAssistantApplication:DeprecationWarning",
+    "ignore",
+    "default:::tests(\\.|$)",
 ]
